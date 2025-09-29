@@ -48,3 +48,12 @@ A **5-head neural network architecture** deployed on the Raspberry Pi performs:
 - Contributes to better crop yield and **safe food production at affordable cost**  
 - **Easy to use** for farmers  
 - Can be integrated as a **plug-in module** with existing solutions and rovers for complete automation  
+
+---
+
+## Collaborators
+- Dhana Anjana S 
+- Ananda valli 
+- Sakthidharan M A
+- Sree Simhan K
+- Vishnu Varthini
