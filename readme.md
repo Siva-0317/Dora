@@ -6,12 +6,9 @@ Traditional pesticide application systems often lead to excessive chemical use, 
 The **Intelligent Pesticide Sprinkling System** addresses this problem with a smart, real-time solution that treats only the plants that actually need it—using just the right amount of pesticides, exactly where and when they're needed.
 
 ## Demo Video
-<video width="640" height="360" controls>
-  <source src="./team_dora_sih_video.mp4" type="video/mp4">
-  Your browser does not support the video tag.  
-</video>
+[![Watch the demo](https://img.youtube.com/vi/K2XuO_kMzR4/0.jpg)](https://youtu.be/K2XuO_kMzR4)
 
-> Click play above or [download/view the demo video](./team_dora_sih_video.mp4) to see the Intelligent Pesticide Sprinkling System in action.
+> Click the image above to watch the Intelligent Pesticide Sprinkling System in action.
 
 ## System Overview
 
