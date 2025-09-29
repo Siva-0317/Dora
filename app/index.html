@@ -1,0 +1,394 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Smart Farm Monitor</title>
+    
+    <!-- PWA Meta Tags -->
+    <meta name="theme-color" content="#218085">
+    <meta name="description" content="Intelligent Pesticide Spraying System with Disease and Pest Management">
+    
+    <!-- PWA Manifest -->
+    <link rel="manifest" href="data:application/json;base64,ewogICJuYW1lIjogIlNtYXJ0IEZhcm0gTW9uaXRvciIsCiAgInNob3J0X25hbWUiOiAiU21hcnRGYXJtIiwKICAiZGVzY3JpcHRpb24iOiAiSW50ZWxsaWdlbnQgUGVzdGljaWRlIFNwcmF5aW5nIFN5c3RlbSIsCiAgInN0YXJ0X3VybCI6ICIvIiwKICAiZGlzcGxheSI6ICJzdGFuZGFsb25lIiwKICAiYmFja2dyb3VuZF9jb2xvciI6ICIjZmNmY2Y5IiwKICAidGhlbWVfY29sb3IiOiAiIzIxODA4NSIsCiAgImljb25zIjogWwogICAgewogICAgICAic3JjIjogImRhdGE6aW1hZ2Uvc3ZnK3htbDtiYXNlNjQsUEhOMlp5QjRiV3h1Y3owpWFIUjBjRG92TDNkM2R5NTNNM1F2TWpBd01DOXpkbWNpSUhkcFpIUm9QU0l5TkNJZ2FHVnBaMmgwUFNJeU5DSTZQSEJoZEdnZ1pEMGliVEV5TGpJdU9HdHdMalV0TVVRdU1pNHpMakl0TlM0M0xqSXROUzRhSnhUR3g0Z6elFsOTVRd2tCczQ2dQU0l5SWk0ellIQW5aMEpqTVM0d0xqUWdNaTQ5TGpRZ05DNDFMalFnTkM0MUxqUWdOQzQxVERJSG4iTGc9PSIsCiAgICAgICJzaXplcyI6ICIyNHgyNCIsCiAgICAgICJ0eXBlIjogImltYWdlL3N2Zyt4bWwiCiAgICB9CiAgXQp9">
+    
+    <!-- Viewport and Mobile Optimization -->
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="default">
+    <meta name="apple-mobile-web-app-title" content="Smart Farm">
+    
+    <link rel="stylesheet" href="style.css">
+    
+    <!-- Material Icons -->
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+    <!-- MQTT.js Library via CDN -->
+    <script src="https://unpkg.com/mqtt/dist/mqtt.min.js"></script>
+
+</head>
+<body>
+    <!-- Loading Splash Screen -->
+    <div id="splash-screen" class="splash-screen">
+        <div class="splash-content">
+            <div class="splash-logo">
+                <i class="material-icons">agriculture</i>
+            </div>
+            <h1 class="splash-title">Smart Farm Monitor</h1>
+            <div class="splash-subtitle">Intelligent Pesticide Management</div>
+            <div class="loading-spinner"></div>
+        </div>
+    </div>
+
+    <!-- Authentication Screen -->
+    <div id="auth-screen" class="auth-screen hidden">
+        <div class="auth-container">
+            <div class="auth-header">
+                <div class="auth-logo">
+                    <i class="material-icons">agriculture</i>
+                </div>
+                <h2 data-translate="appTitle">Smart Farm Monitor</h2>
+                <p class="auth-subtitle">Secure OTP Login</p>
+            </div>
+
+            <!-- Phone Number Step -->
+            <div id="phone-step" class="auth-step">
+                <div class="form-group">
+                    <label class="form-label" data-translate="phoneNumber">Phone Number</label>
+                    <div class="phone-input-group">
+                        <select class="country-code form-control">
+                            <option value="+91">+91 (IN)</option>
+                        </select>
+                        <input type="tel" id="phone-input" class="form-control" placeholder="9876543210" maxlength="10">
+                    </div>
+                </div>
+                <button id="send-otp-btn" class="btn btn--primary btn--full-width">
+                    Send OTP
+                </button>
+            </div>
+
+            <!-- OTP Step -->
+            <div id="otp-step" class="auth-step hidden">
+                <div class="form-group">
+                    <label class="form-label" data-translate="enterOTP">Enter OTP</label>
+                    <div class="otp-input-group">
+                        <input type="text" class="otp-digit" maxlength="1">
+                        <input type="text" class="otp-digit" maxlength="1">
+                        <input type="text" class="otp-digit" maxlength="1">
+                        <input type="text" class="otp-digit" maxlength="1">
+                        <input type="text" class="otp-digit" maxlength="1">
+                        <input type="text" class="otp-digit" maxlength="1">
+                    </div>
+                    <p class="otp-info">OTP sent to <span id="phone-display"></span></p>
+                </div>
+                <button id="verify-otp-btn" class="btn btn--primary btn--full-width">
+                    <span data-translate="verify">Verify</span>
+                </button>
+                <button id="resend-otp-btn" class="btn btn--secondary btn--full-width mt-8">
+                    Resend OTP
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Main Application -->
+    <div id="app-container" class="app-container hidden">
+        <!-- Header -->
+        <header class="app-header">
+            <div class="header-content">
+                <div class="header-left">
+                    <h1 class="app-title" data-translate="appTitle">Smart Farm Monitor</h1>
+                </div>
+                <div class="header-right">
+                    <button id="emergency-btn" class="btn btn--outline emergency-btn">
+                        <i class="material-icons">emergency</i>
+                        <span data-translate="emergency">Emergency</span>
+                    </button>
+                    <button id="language-toggle" class="language-toggle btn btn--secondary">
+                        <span class="flag-icon">🇬🇧</span>
+                        <span class="language-text">EN</span>
+                    </button>
+                    <div class="user-menu">
+                        <button class="user-avatar btn btn--secondary">
+                            <i class="material-icons">person</i>
+                        </button>
+                        <div class="user-dropdown hidden">
+                            <div class="user-phone" id="user-phone-display"></div>
+                            <button id="logout-btn" class="btn btn--outline btn--sm">Logout</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <!-- Weather Alert Banner -->
+            <div id="weather-alert-banner" class="weather-alert-banner hidden">
+                <div class="alert-banner-content">
+                    <i class="material-icons">warning</i>
+                    <span id="weather-alert-message"></span>
+                    <button id="dismiss-alert" class="btn--icon">
+                        <i class="material-icons">close</i>
+                    </button>
+                </div>
+            </div>
+        </header>
+
+        <!-- Main Dashboard -->
+        <main class="dashboard">
+            <div class="container">
+                <!-- Farm Health Overview Card -->
+                <section class="dashboard-section">
+                    <div class="card farm-health-overview">
+                        <div class="card__header">
+                            <h3 data-translate="farmHealthOverview">Farm Health Overview</h3>
+                            <div class="card-status" id="overall-status-indicator">
+                                <div class="status-dot warning"></div>
+                                <span class="status-text" data-translate="attention">Attention Required</span>
+                            </div>
+                        </div>
+                        <div class="card__body">
+                            <div class="health-metrics">
+                                <div class="metric-item">
+                                    <div class="metric-icon disease">
+                                        <i class="material-icons">local_hospital</i>
+                                    </div>
+                                    <div class="metric-details">
+                                        <div class="metric-value" id="active-diseases">3</div>
+                                        <div class="metric-label" data-translate="activeDiseases">Active Diseases</div>
+                                    </div>
+                                </div>
+                                <div class="metric-item">
+                                    <div class="metric-icon pest">
+                                        <i class="material-icons">bug_report</i>
+                                    </div>
+                                    <div class="metric-details">
+                                        <div class="metric-value" id="active-pests">2</div>
+                                        <div class="metric-label" data-translate="activePests">Active Pests</div>
+                                    </div>
+                                </div>
+                                <div class="metric-item">
+                                    <div class="metric-icon effectiveness">
+                                        <i class="material-icons">analytics</i>
+                                    </div>
+                                    <div class="metric-details">
+                                        <div class="metric-value" id="treatment-effectiveness">78%</div>
+                                        <div class="metric-label" data-translate="treatmentEffectiveness">Treatment Effectiveness</div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- Three-Tank Status Panel -->
+                <section class="dashboard-section">
+                    <div class="card three-tank-panel">
+                        <div class="card__header">
+                            <h3 data-translate="tankStatus">Tank Status</h3>
+                            <div class="tank-controls">
+                                <button id="refill-all-btn" class="btn btn--sm btn--secondary">
+                                    <i class="material-icons">water_drop</i>
+                                    <span data-translate="refillAll">Refill All</span>
+                                </button>
+                            </div>
+                        </div>
+                        <div class="card__body">
+                            <div class="tank-grid">
+                                <!-- Insecticide Tank -->
+                                <div class="tank-item">
+                                    <div class="tank-header">
+                                        <div class="tank-title">
+                                            <i class="material-icons">pest_control</i>
+                                            <span data-translate="insecticide">Insecticide</span>
+                                        </div>
+                                        <div class="tank-status normal" id="insecticide-status">Normal</div>
+                                    </div>
+                                    <div class="tank-visual">
+                                        <div class="tank-container">
+                                            <div class="tank-level" id="insecticide-level" style="height: 65%"></div>
+                                        </div>
+                                        <div class="tank-percentage" id="insecticide-percentage">65%</div>
+                                    </div>
+                                    <div class="tank-details">
+                                        <div class="tank-detail">
+                                            <span data-translate="capacity">Capacity:</span>
+                                            <span id="insecticide-liters">130L / 200L</span>
+                                        </div>
+                                        <div class="tank-detail">
+                                            <span data-translate="activeIngredient">Active:</span>
+                                            <span id="insecticide-ingredient">Imidacloprid 17.8%</span>
+                                        </div>
+                                        <div class="tank-detail">
+                                            <span data-translate="usageToday">Today:</span>
+                                            <span id="insecticide-usage">12.5L</span>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <!-- Fungicide Tank -->
+                                <div class="tank-item">
+                                    <div class="tank-header">
+                                        <div class="tank-title">
+                                            <i class="material-icons">science</i>
+                                            <span data-translate="fungicide">Fungicide</span>
+                                        </div>
+                                        <div class="tank-status attention" id="fungicide-status">Attention</div>
+                                    </div>
+                                    <div class="tank-visual">
+                                        <div class="tank-container">
+                                            <div class="tank-level fungicide" id="fungicide-level" style="height: 45%"></div>
+                                        </div>
+                                        <div class="tank-percentage" id="fungicide-percentage">45%</div>
+                                    </div>
+                                    <div class="tank-details">
+                                        <div class="tank-detail">
+                                            <span data-translate="capacity">Capacity:</span>
+                                            <span id="fungicide-liters">67.5L / 150L</span>
+                                        </div>
+                                        <div class="tank-detail">
+                                            <span data-translate="activeIngredient">Active:</span>
+                                            <span id="fungicide-ingredient">Mancozeb 75%</span>
+                                        </div>
+                                        <div class="tank-detail">
+                                            <span data-translate="usageToday">Today:</span>
+                                            <span id="fungicide-usage">8.3L</span>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <!-- Water Tank -->
+                                <div class="tank-item">
+                                    <div class="tank-header">
+                                        <div class="tank-title">
+                                            <i class="material-icons">water_drop</i>
+                                            <span data-translate="water">Water</span>
+                                        </div>
+                                        <div class="tank-status normal" id="water-status">Normal</div>
+                                    </div>
+                                    <div class="tank-visual">
+                                        <div class="tank-container">
+                                            <div class="tank-level water" id="water-level" style="height: 82%"></div>
+                                        </div>
+                                        <div class="tank-percentage" id="water-percentage">82%</div>
+                                    </div>
+                                    <div class="tank-details">
+                                        <div class="tank-detail">
+                                            <span data-translate="capacity">Capacity:</span>
+                                            <span id="water-liters">410L / 500L</span>
+                                        </div>
+                                        <div class="tank-detail">
+                                            <span data-translate="quality">Quality:</span>
+                                            <span id="water-quality">Good</span>
+                                        </div>
+                                        <div class="tank-detail">
+                                            <span data-translate="flowRate">Flow Rate:</span>
+                                            <span id="water-flow">15.2 L/min</span>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- Disease and Pest Management Row -->
+                <div class="dashboard-row">
+                    <!-- Disease Detection Section -->
+                    <section class="dashboard-section dashboard-section--half">
+                        <div class="card disease-card">
+                            <div class="card__header">
+                                <h3 data-translate="diseases">Diseases</h3>
+                                <div class="section-badge">
+                                    <span id="disease-count">3</span>
+                                    <span data-translate="active">Active</span>
+                                </div>
+                            </div>
+                            <div class="card__body">
+                                <div class="detection-list" id="disease-list">
+                                    <!-- Disease items will be populated by JavaScript -->
+                                </div>
+                            </div>
+                        </div>
+                    </section>
+
+                    <!-- Pest Monitoring Section -->
+                    <section class="dashboard-section dashboard-section--half">
+                        <div class="card pest-card">
+                            <div class="card__header">
+                                <h3 data-translate="pests">Pests</h3>
+                                <div class="section-badge">
+                                    <span id="pest-count">2</span>
+                                    <span data-translate="active">Active</span>
+                                </div>
+                            </div>
+                            <div class="card__body">
+                                <div class="detection-list" id="pest-list">
+                                    <!-- Pest items will be populated by JavaScript -->
+                                </div>
+                            </div>
+                        </div>
+                    </section>
+                </div>
+
+                <!-- Weather and Treatment Row -->
+                <div class="dashboard-row">
+                    <!-- Weather Information Widget -->
+                    <section class="dashboard-section dashboard-section--half">
+                        <div class="card weather-card">
+                            <div class="card__header">
+                                <h3 data-translate="weather">Weather</h3>
+                                <div class="weather-location" id="weather-location">Salem, TN</div>
+                            </div>
+                            <div class="card__body">
+                                <div class="weather-current">
+                                    <div class="weather-temp" id="current-temp">28°C</div>
+                                    <div class="weather-condition" id="weather-condition">
+                                        <i class="material-icons weather-icon">partly_sunny</i>
+                                        <span>Partly Cloudy</span>
+                                    </div>
+                                </div>
+                                <div class="weather-details">
+                                    <div class="weather-detail">
+                                        <i class="material-icons">water_drop</i>
+                                        <span id="humidity">72%</span>
+                                    </div>
+                                    <div class="weather-detail">
+                                        <i class="material-icons">air</i>
+                                        <span id="wind-speed">8 km/h</span>
+                                    </div>
+                                </div>
+                                <div class="weather-indicators">
+                                    <div class="weather-indicator">
+                                        <div class="indicator-label" data-translate="sprayConditions">Spray Conditions</div>
+                                        <div class="indicator-status favorable" id="spray-conditions">Favorable</div>
+                                    </div>
+                                    <div class="weather-indicator">
+                                        <div class="indicator-label" data-translate="diseaseRisk">Disease Risk</div>
+                                        <div class="indicator-status medium" id="disease-risk">Medium</div>
+                                    </div>
+                                </div>
+                                <div class="weather-forecast" id="weather-forecast">
+                                    <!-- Forecast items will be populated by JavaScript -->
+                                </div>
+                            </div>
+                        </div>
+                    </section>
+
+                    <!-- Treatment Recommendations Panel -->
+                    <section class="dashboard-section dashboard-section--half">
+                        <div class="card recommendations-card">
+                            <div class="card__header">
+                                <h3 data-translate="recommendations">Recommendations</h3>
+                                <div class="recommendations-count" id="recommendations-count">2</div>
+                            </div>
+                            <div class="card__body">
+                                <div class="recommendations-list" id="recommendations-list">
+                                    <!-- Recommendation items will be populated by JavaScript -->
+                                </div>
+                            </div>
+                        </div>
+                    </section>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <script src="app.js"></script>
+</body>
+</html>
