@@ -5,7 +5,13 @@ Traditional pesticide application systems often lead to excessive chemical use, 
 
 The **Intelligent Pesticide Sprinkling System** addresses this problem with a smart, real-time solution that treats only the plants that actually need it—using just the right amount of pesticides, exactly where and when they're needed.
 
----
+
+## Demo Video
+
+[![Watch the demo](https://img.youtube.com/vi/VIDEO_ID/0.jpg)](./team dora sih video.mp4)
+
+> Click the image above or [download/view the demo video](./team dora sih video.mp4) to see the Intelligent Pesticide Sprinkling System in action.
+
 
 ## System Overview
 
