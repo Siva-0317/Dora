@@ -11,7 +11,7 @@ The **Intelligent Pesticide Sprinkling System** addresses this problem with a sm
   Your browser does not support the video tag.  
 </video>
 
-> Click play above or [download/view the demo video](./team%20dora%20sih%20video.mp4) to see the Intelligent Pesticide Sprinkling System in action.
+> Click play above or [download/view the demo video](./team_dora_sih_video.mp4) to see the Intelligent Pesticide Sprinkling System in action.
 
 ## System Overview
 
